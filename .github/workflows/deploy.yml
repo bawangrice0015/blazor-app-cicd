@@ -36,8 +36,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment: test
-    on:
-      workflow_dispatch:  # Allows manual trigger for TEST
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -56,8 +54,6 @@ jobs:
     needs: deploy-test
     runs-on: ubuntu-latest
     environment: uat
-    on:
-      workflow_dispatch:  # Allows manual trigger for UAT
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -76,8 +72,6 @@ jobs:
     needs: deploy-uat
     runs-on: ubuntu-latest
     environment: production
-    on:
-      workflow_dispatch:  # Allows manual trigger for PROD
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
