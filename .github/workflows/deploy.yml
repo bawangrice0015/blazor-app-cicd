@@ -25,14 +25,11 @@ jobs:
       - name: Publish
         run: dotnet publish -c Release -o ./publish
 
-      - name: Archive build output
-        run: zip -r blazor-app.zip ./publish
-
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Updated to v4
         with:
           name: blazor-app
-          path: blazor-app.zip
+          path: ./publish
 
   deploy-test:
     needs: build
@@ -40,13 +37,10 @@ jobs:
     environment: test
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4  # Updated to v4
         with:
           name: blazor-app
           path: ./publish
-
-      - name: Unzip artifact
-        run: unzip blazor-app.zip -d ./publish
 
       - name: Deploy to Test
         uses: azure/webapps-deploy@v2
@@ -61,13 +55,10 @@ jobs:
     environment: uat
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4  # Updated to v4
         with:
           name: blazor-app
           path: ./publish
-
-      - name: Unzip artifact
-        run: unzip blazor-app.zip -d ./publish
 
       - name: Deploy to UAT
         uses: azure/webapps-deploy@v2
@@ -82,13 +73,10 @@ jobs:
     environment: production
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4  # Updated to v4
         with:
           name: blazor-app
           path: ./publish
-
-      - name: Unzip artifact
-        run: unzip blazor-app.zip -d ./publish
 
       - name: Deploy to Production
         uses: azure/webapps-deploy@v2
