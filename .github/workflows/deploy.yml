@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-  workflow_dispatch:  # Enables manual execution
+  workflow_dispatch:
 
 jobs:
   build:
@@ -41,7 +41,6 @@ jobs:
         with:
           name: blazor-app
           path: ./publish
-
       - name: Deploy to Test
         uses: azure/webapps-deploy@v2
         with:
@@ -58,7 +57,6 @@ jobs:
         with:
           name: blazor-app
           path: ./publish
-
       - name: Deploy to UAT
         uses: azure/webapps-deploy@v2
         with:
@@ -66,9 +64,29 @@ jobs:
           publish-profile: ${{ secrets.AZURE_CREDENTIALS_UAT }}
           package: ./publish
 
+  gate-test:
+    needs: deploy-test
+    runs-on: ubuntu-latest
+    outputs:
+      allow: ${{ steps.set.outputs.allow }}
+    steps:
+      - id: set
+        run: echo "allow=true" >> $GITHUB_OUTPUT
+
+  gate-uat:
+    needs: deploy-uat
+    runs-on: ubuntu-latest
+    outputs:
+      allow: ${{ steps.set.outputs.allow }}
+    steps:
+      - id: set
+        run: echo "allow=true" >> $GITHUB_OUTPUT
+
   deploy-prod:
-    needs: [deploy-test, deploy-uat]  # Waits for either Test or UAT before proceeding
-    if: always()  # Ensures Prod runs after at least one deployment
+    needs: [gate-test, gate-uat]
+    if: |
+      needs.gate-test.outputs.allow == 'true' || 
+      needs.gate-uat.outputs.allow == 'true'
     runs-on: ubuntu-latest
     environment: production
     steps:
