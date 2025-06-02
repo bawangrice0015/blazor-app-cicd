@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:  # Enables manual execution
 
 jobs:
   build:
@@ -26,7 +27,7 @@ jobs:
         run: dotnet publish -c Release -o ./publish
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4  # Updated to v4
+        uses: actions/upload-artifact@v4
         with:
           name: blazor-app
           path: ./publish
@@ -35,9 +36,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment: test
+    on:
+      workflow_dispatch:  # Allows manual trigger for TEST
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4  # Updated to v4
+        uses: actions/download-artifact@v4
         with:
           name: blazor-app
           path: ./publish
@@ -53,9 +56,11 @@ jobs:
     needs: deploy-test
     runs-on: ubuntu-latest
     environment: uat
+    on:
+      workflow_dispatch:  # Allows manual trigger for UAT
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4  # Updated to v4
+        uses: actions/download-artifact@v4
         with:
           name: blazor-app
           path: ./publish
@@ -71,9 +76,11 @@ jobs:
     needs: deploy-uat
     runs-on: ubuntu-latest
     environment: production
+    on:
+      workflow_dispatch:  # Allows manual trigger for PROD
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4  # Updated to v4
+        uses: actions/download-artifact@v4
         with:
           name: blazor-app
           path: ./publish
