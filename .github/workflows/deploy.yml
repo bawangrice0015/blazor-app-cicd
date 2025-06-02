@@ -26,7 +26,7 @@ jobs:
         run: dotnet publish -c Release -o ./publish
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v2  # Updated from v2.3.1 to v2
         with:
           name: blazor-app
           path: ./publish
@@ -37,7 +37,7 @@ jobs:
     environment: test
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v2.1.4
+        uses: actions/download-artifact@v2
         with:
           name: blazor-app
           path: ./publish
@@ -55,7 +55,7 @@ jobs:
     environment: uat
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v2.1.4
+        uses: actions/download-artifact@v2
         with:
           name: blazor-app
           path: ./publish
@@ -73,7 +73,7 @@ jobs:
     environment: production
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v2.1.4
+        uses: actions/download-artifact@v2
         with:
           name: blazor-app
           path: ./publish
