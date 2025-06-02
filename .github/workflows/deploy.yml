@@ -1,4 +1,3 @@
-
 name: CI/CD Blazor WebAssembly
 
 on:
@@ -34,6 +33,7 @@ jobs:
           path: ./publish
 
   deploy-test:
+    needs: build
     runs-on: ubuntu-latest
     environment: test
     steps:
@@ -51,6 +51,7 @@ jobs:
           package: ./publish
 
   deploy-uat:
+    needs: deploy-test
     runs-on: ubuntu-latest
     environment: uat
     steps:
@@ -68,6 +69,7 @@ jobs:
           package: ./publish
 
   deploy-prod:
+    needs: deploy-uat
     runs-on: ubuntu-latest
     environment: production
     steps:
