@@ -1,0 +1,32 @@
+name: Deploy Test
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy-test:
+    runs-on: ubuntu-latest
+    environment: test  # manual approval required here
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+      - run: dotnet restore
+      - run: dotnet build --configuration Release
+      - run: dotnet publish -c Release -o ./publish
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: blazor-app
+          path: ./publish
+      - name: Deploy to Test
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_TEST }}
+          publish-profile: ${{ secrets.AZURE_CREDENTIALS_TEST }}
+          package: ./publish
