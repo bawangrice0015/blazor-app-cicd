@@ -1,1 +1,85 @@
 
+name: CI/CD Blazor WebAssembly
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:  # Enables manual execution
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release
+
+      - name: Publish
+        run: dotnet publish -c Release -o ./publish
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: blazor-app
+          path: ./publish
+
+  deploy-test:
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: blazor-app
+          path: ./publish
+
+      - name: Deploy to Test
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_TEST }}
+          publish-profile: ${{ secrets.AZURE_CREDENTIALS_TEST }}
+          package: ./publish
+
+  deploy-uat:
+    runs-on: ubuntu-latest
+    environment: uat
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: blazor-app
+          path: ./publish
+
+      - name: Deploy to UAT
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_UAT }}
+          publish-profile: ${{ secrets.AZURE_CREDENTIALS_UAT }}
+          package: ./publish
+
+  deploy-prod:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: blazor-app
+          path: ./publish
+
+      - name: Deploy to Production
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_PROD }}
+          publish-profile: ${{ secrets.AZURE_CREDENTIALS_PROD }}
+          package: ./publish
