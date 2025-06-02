@@ -35,7 +35,7 @@ jobs:
   deploy-test:
     needs: build
     runs-on: ubuntu-latest
-    environment: test  # manual approval required
+    environment: test  # manual approval required in GitHub UI
     outputs:
       success: ${{ steps.set.outputs.success }}
     steps:
@@ -58,7 +58,7 @@ jobs:
   deploy-uat:
     needs: build
     runs-on: ubuntu-latest
-    environment: uat  # manual approval required
+    environment: uat  # manual approval required in GitHub UI
     outputs:
       success: ${{ steps.set.outputs.success }}
     steps:
@@ -81,10 +81,10 @@ jobs:
   deploy-prod:
     needs: [deploy-test, deploy-uat]
     if: |
-      needs.deploy-test.outputs.success == 'true' ||
+      needs.deploy-test.outputs.success == 'true' || 
       needs.deploy-uat.outputs.success == 'true'
     runs-on: ubuntu-latest
-    environment: production  # manual approval required
+    environment: production  # manual approval required in GitHub UI
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
