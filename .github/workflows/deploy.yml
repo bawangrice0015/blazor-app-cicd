@@ -67,7 +67,8 @@ jobs:
           package: ./publish
 
   deploy-prod:
-    needs: [deploy-test, deploy-uat]  # Requires at least one environment before proceeding
+    needs: [deploy-test, deploy-uat]  # Requires either Test or UAT before proceeding
+    if: success()  # Runs once at least one of them is successful
     runs-on: ubuntu-latest
     environment: production
     steps:
