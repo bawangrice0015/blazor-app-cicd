@@ -33,14 +33,18 @@ jobs:
           path: ./publish
 
   deploy-test:
+    needs: build
     runs-on: ubuntu-latest
-    environment: test
+    environment: test  # manual approval required
+    outputs:
+      success: ${{ steps.set.outputs.success }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: blazor-app
           path: ./publish
+
       - name: Deploy to Test
         uses: azure/webapps-deploy@v2
         with:
@@ -48,15 +52,22 @@ jobs:
           publish-profile: ${{ secrets.AZURE_CREDENTIALS_TEST }}
           package: ./publish
 
+      - id: set
+        run: echo "success=true" >> $GITHUB_OUTPUT
+
   deploy-uat:
+    needs: build
     runs-on: ubuntu-latest
-    environment: uat
+    environment: uat  # manual approval required
+    outputs:
+      success: ${{ steps.set.outputs.success }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: blazor-app
           path: ./publish
+
       - name: Deploy to UAT
         uses: azure/webapps-deploy@v2
         with:
@@ -64,31 +75,16 @@ jobs:
           publish-profile: ${{ secrets.AZURE_CREDENTIALS_UAT }}
           package: ./publish
 
-  gate-test:
-    needs: deploy-test
-    runs-on: ubuntu-latest
-    outputs:
-      allow: ${{ steps.set.outputs.allow }}
-    steps:
       - id: set
-        run: echo "allow=true" >> $GITHUB_OUTPUT
-
-  gate-uat:
-    needs: deploy-uat
-    runs-on: ubuntu-latest
-    outputs:
-      allow: ${{ steps.set.outputs.allow }}
-    steps:
-      - id: set
-        run: echo "allow=true" >> $GITHUB_OUTPUT
+        run: echo "success=true" >> $GITHUB_OUTPUT
 
   deploy-prod:
-    needs: [gate-test, gate-uat]
+    needs: [deploy-test, deploy-uat]
     if: |
-      needs.gate-test.outputs.allow == 'true' || 
-      needs.gate-uat.outputs.allow == 'true'
+      needs.deploy-test.outputs.success == 'true' ||
+      needs.deploy-uat.outputs.success == 'true'
     runs-on: ubuntu-latest
-    environment: production
+    environment: production  # manual approval required
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
