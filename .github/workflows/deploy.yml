@@ -36,6 +36,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment: test  # manual approval required in GitHub UI
+    continue-on-error: true
     outputs:
       success: ${{ steps.set.outputs.success }}
     steps:
@@ -59,6 +60,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment: uat  # manual approval required in GitHub UI
+    continue-on-error: true
     outputs:
       success: ${{ steps.set.outputs.success }}
     steps:
@@ -81,8 +83,7 @@ jobs:
   deploy-prod:
     needs: [deploy-test, deploy-uat]
     if: |
-      needs.deploy-test.outputs.success == 'true' || 
-      needs.deploy-uat.outputs.success == 'true'
+      needs.deploy-test.result == 'success' || needs.deploy-uat.result == 'success'
     runs-on: ubuntu-latest
     environment: production  # manual approval required in GitHub UI
     steps:
